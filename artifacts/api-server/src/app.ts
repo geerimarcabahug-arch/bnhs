@@ -38,11 +38,14 @@ app.use(
   }),
 );
 
-// Restrict CORS to the same origin in production; allow localhost in development
-const allowedOrigins: (string | RegExp)[] =
-  process.env.NODE_ENV === "production"
-    ? [process.env.CORS_ORIGIN ?? ""].filter(Boolean)
-    : [/^https?:\/\/localhost(:\d+)?$/, /\.replit\.dev$/, /\.repl\.co$/];
+// Allow localhost in dev plus all Replit preview/deployment domains in all environments
+const allowedOrigins: (string | RegExp)[] = [
+  /^https?:\/\/localhost(:\d+)?$/,
+  /\.replit\.dev$/,
+  /\.repl\.co$/,
+  /\.replit\.app$/,
+  ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
+];
 
 app.use(
   cors({
@@ -66,7 +69,7 @@ app.use(
     store: new PgSession({
       pool,
       tableName: "session",
-      createTableIfMissing: true,
+      createTableIfMissing: false,
     }),
     secret: SESSION_SECRET,
     resave: false,
