@@ -2,8 +2,8 @@ import express, { Express, NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { pinoHttp } from "pino-http";
 
-const pinoHttp = (pinoHttpModule as unknown as { default?: typeof pinoHttpModule.pinoHttp }).default
-  ?? (pinoHttpModule as unknown as typeof pinoHttpModule.pinoHttp);
+const pinoHttp = (pinoHttp as unknown as { default?: typeof pinoHttpModule.pinoHttp }).default
+  ?? (pinoHttp as unknown as typeof pinoHttpModule.pinoHttp);
 import session from "express-session";
 import ConnectPgSimple from "connect-pg-simple";
 import router from "./routes";
