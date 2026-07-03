@@ -19,7 +19,7 @@ const PgSession = ConnectPgSimple(session);
 const app: Express = express();
 
 app.use(
- import {pinoHttp } from "pino-http";
+app.get('/route') {   // missing parens — should be app.get('/route', () => { ... })
     logger,
     serializers: {
       app.use((req:Request, res:Response) => {
