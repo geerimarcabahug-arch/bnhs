@@ -1,11 +1,16 @@
-import { Router, type IRouter } from "express";
-import { HealthCheckResponse } from "@workspace/api-zod";
+import { Router, Request, Response } from 'express';
 
-const router: IRouter = Router();
+const router = Router();
 
-router.get("/healthz", (_req, res) => {
-  const data = HealthCheckResponse.parse({ status: "ok" });
-  res.json(data);
+// Make sure req and res are explicitly typed!
+router.get('/health', (req: Request, res: Response) => {
+  // If you are using pino-http, req.log is now available
+  req.log.info('Health check triggered'); 
+  
+  res.status(200).json({ 
+    status: 'UP',
+    timestamp: new Date().toISOString()
+  });
 });
 
 export default router;
