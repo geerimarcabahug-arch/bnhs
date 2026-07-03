@@ -1,6 +1,6 @@
 import express, { Express, NextFunction, Request, Response } from "express";
 import cors from "cors";
-import { pinoHttpModule } from "pino-http";
+import { pinoHttp } from "pino-http";
 
 const pinoHttp = (pinoHttpModule as unknown as { default?: typeof pinoHttpModule.pinoHttp }).default
   ?? (pinoHttpModule as unknown as typeof pinoHttpModule.pinoHttp);
