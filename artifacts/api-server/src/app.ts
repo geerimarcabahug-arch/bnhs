@@ -9,7 +9,7 @@ const pinoHttp = (pinoHttpModule as unknown as { default?: typeof pinoHttpModule
   ?? (pinoHttpModule as unknown as typeof pinoHttpModule.pinoHttp);
 import session from "express-session";
 import ConnectPgSimple from "connect-pg-simple";
-import router from "./routes";
+import router from "./routes/index.js";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 
