@@ -1,4 +1,4 @@
-import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import { Request, Response } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import session from "express-session";
@@ -19,17 +19,10 @@ const PgSession = ConnectPgSimple(session);
 const app: Express = express();
 
 app.use(
-  pinoHttp({
+ import {pinoHttp } from "pino-http";
     logger,
     serializers: {
-      req(req) {
-        return {
-          id: req.id,
-          method: req.method,
-          url: req.url?.split("?")[0],
-        };
-      },
-      res(res) {
+      app.use((req:Request, res:Response) => {
         return {
           statusCode: res.statusCode,
         };
