@@ -1,22 +1,34 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Burgos National High School Portal API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: dashboard
+  - name: students
+  - name: personnel
+  - name: news
+  - name: announcements
+  - name: events
+  - name: downloads
+  - name: gallery
+  - name: sslg
+  - name: pta
+  - name: about
+  - name: search
+  - name: users
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +36,1002 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── AUTH ──────────────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current session user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+
+  # ── DASHBOARD ─────────────────────────────────────────────────────────────
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Dashboard statistics
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  # ── STUDENTS ──────────────────────────────────────────────────────────────
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List students
+      parameters:
+        - name: grade
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: section
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentListResponse"
+    post:
+      operationId: createStudent
+      tags: [students]
+      summary: Create student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+
+  /students/by-grade:
+    get:
+      operationId: getStudentsByGrade
+      tags: [students]
+      summary: Get student counts grouped by grade and section
+      responses:
+        "200":
+          description: Grouped counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GradeSection"
+
+  /students/{id}:
+    get:
+      operationId: getStudent
+      tags: [students]
+      summary: Get student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateStudent
+      tags: [students]
+      summary: Update student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+    delete:
+      operationId: deleteStudent
+      tags: [students]
+      summary: Delete student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── PERSONNEL ─────────────────────────────────────────────────────────────
+  /personnel:
+    get:
+      operationId: listPersonnel
+      tags: [personnel]
+      summary: List personnel
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: ["string", "null"]
+            enum: [teaching, non_teaching, admin, null]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Personnel list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Personnel"
+    post:
+      operationId: createPersonnel
+      tags: [personnel]
+      summary: Create personnel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonnelInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Personnel"
+
+  /personnel/{id}:
+    get:
+      operationId: getPersonnel
+      tags: [personnel]
+      summary: Get personnel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Personnel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Personnel"
+    patch:
+      operationId: updatePersonnel
+      tags: [personnel]
+      summary: Update personnel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonnelUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Personnel"
+    delete:
+      operationId: deletePersonnel
+      tags: [personnel]
+      summary: Delete personnel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── NEWS ──────────────────────────────────────────────────────────────────
+  /news:
+    get:
+      operationId: listNews
+      tags: [news]
+      summary: List news articles
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: pinned
+          in: query
+          schema:
+            type: ["boolean", "null"]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: News list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsListResponse"
+    post:
+      operationId: createNews
+      tags: [news]
+      summary: Create news article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/News"
+
+  /news/{id}:
+    get:
+      operationId: getNews
+      tags: [news]
+      summary: Get news article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: News article
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/News"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateNews
+      tags: [news]
+      summary: Update news article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/News"
+    delete:
+      operationId: deleteNews
+      tags: [news]
+      summary: Delete news article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── ANNOUNCEMENTS ─────────────────────────────────────────────────────────
+  /announcements:
+    get:
+      operationId: listAnnouncements
+      tags: [announcements]
+      summary: List announcements
+      parameters:
+        - name: pinned
+          in: query
+          schema:
+            type: ["boolean", "null"]
+        - name: emergency
+          in: query
+          schema:
+            type: ["boolean", "null"]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Announcements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnnouncementListResponse"
+    post:
+      operationId: createAnnouncement
+      tags: [announcements]
+      summary: Create announcement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+
+  /announcements/{id}:
+    get:
+      operationId: getAnnouncement
+      tags: [announcements]
+      summary: Get announcement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Announcement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+    patch:
+      operationId: updateAnnouncement
+      tags: [announcements]
+      summary: Update announcement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+    delete:
+      operationId: deleteAnnouncement
+      tags: [announcements]
+      summary: Delete announcement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── EVENTS ────────────────────────────────────────────────────────────────
+  /events:
+    get:
+      operationId: listEvents
+      tags: [events]
+      summary: List events
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: year
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: upcoming
+          in: query
+          schema:
+            type: ["boolean", "null"]
+      responses:
+        "200":
+          description: Events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+    post:
+      operationId: createEvent
+      tags: [events]
+      summary: Create event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+
+  /events/{id}:
+    patch:
+      operationId: updateEvent
+      tags: [events]
+      summary: Update event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+    delete:
+      operationId: deleteEvent
+      tags: [events]
+      summary: Delete event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── DOWNLOADS ─────────────────────────────────────────────────────────────
+  /downloads:
+    get:
+      operationId: listDownloads
+      tags: [downloads]
+      summary: List downloadable files
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Downloads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Download"
+    post:
+      operationId: createDownload
+      tags: [downloads]
+      summary: Create download entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DownloadInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Download"
+
+  /downloads/{id}:
+    patch:
+      operationId: updateDownload
+      tags: [downloads]
+      summary: Update download entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DownloadUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Download"
+    delete:
+      operationId: deleteDownload
+      tags: [downloads]
+      summary: Delete download entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── GALLERY ───────────────────────────────────────────────────────────────
+  /gallery:
+    get:
+      operationId: listGallery
+      tags: [gallery]
+      summary: List gallery items
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: media_type
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Gallery items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GalleryItem"
+    post:
+      operationId: createGalleryItem
+      tags: [gallery]
+      summary: Add gallery item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GalleryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryItem"
+
+  /gallery/{id}:
+    delete:
+      operationId: deleteGalleryItem
+      tags: [gallery]
+      summary: Delete gallery item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── SSLG ──────────────────────────────────────────────────────────────────
+  /sslg:
+    get:
+      operationId: getSSLG
+      tags: [sslg]
+      summary: Get SSLG info
+      responses:
+        "200":
+          description: SSLG info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SSLG"
+    put:
+      operationId: updateSSLG
+      tags: [sslg]
+      summary: Update SSLG info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SSLGInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SSLG"
+
+  /sslg/officers:
+    get:
+      operationId: listSSLGOfficers
+      tags: [sslg]
+      summary: List SSLG officers
+      responses:
+        "200":
+          description: Officers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SSLGOfficer"
+    post:
+      operationId: createSSLGOfficer
+      tags: [sslg]
+      summary: Create SSLG officer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SSLGOfficerInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SSLGOfficer"
+
+  /sslg/officers/{id}:
+    delete:
+      operationId: deleteSSLGOfficer
+      tags: [sslg]
+      summary: Delete SSLG officer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── PTA ───────────────────────────────────────────────────────────────────
+  /pta:
+    get:
+      operationId: getPTA
+      tags: [pta]
+      summary: Get PTA info
+      responses:
+        "200":
+          description: PTA info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PTA"
+    put:
+      operationId: updatePTA
+      tags: [pta]
+      summary: Update PTA info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PTAInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PTA"
+
+  /pta/officers:
+    get:
+      operationId: listPTAOfficers
+      tags: [pta]
+      summary: List PTA officers
+      responses:
+        "200":
+          description: Officers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PTAOfficer"
+    post:
+      operationId: createPTAOfficer
+      tags: [pta]
+      summary: Create PTA officer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PTAOfficerInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PTAOfficer"
+
+  /pta/officers/{id}:
+    delete:
+      operationId: deletePTAOfficer
+      tags: [pta]
+      summary: Delete PTA officer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── ABOUT ─────────────────────────────────────────────────────────────────
+  /about:
+    get:
+      operationId: getAbout
+      tags: [about]
+      summary: Get about content
+      responses:
+        "200":
+          description: About content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/About"
+    put:
+      operationId: updateAbout
+      tags: [about]
+      summary: Update about content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AboutInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/About"
+
+  # ── SEARCH ────────────────────────────────────────────────────────────────
+  /search:
+    get:
+      operationId: siteSearch
+      tags: [search]
+      summary: Site-wide search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+
+  # ── USERS ─────────────────────────────────────────────────────────────────
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List users (admin only)
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +1039,781 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    # ── AUTH ───────────────────────────────────────────────────────────────
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthUser:
+      type: object
+      required: [id, username, name, role]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, teacher, staff]
+
+    # ── DASHBOARD ─────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [totalStudents, totalPersonnel, totalNews, totalAnnouncements, recentNews, recentAnnouncements, upcomingEvents, studentsByGrade]
+      properties:
+        totalStudents:
+          type: integer
+        totalPersonnel:
+          type: integer
+        totalNews:
+          type: integer
+        totalAnnouncements:
+          type: integer
+        recentNews:
+          type: array
+          items:
+            $ref: "#/components/schemas/NewsSummary"
+        recentAnnouncements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Announcement"
+        upcomingEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+        studentsByGrade:
+          type: array
+          items:
+            $ref: "#/components/schemas/GradeCount"
+
+    GradeCount:
+      type: object
+      required: [grade, count]
+      properties:
+        grade:
+          type: integer
+        count:
+          type: integer
+
+    NewsSummary:
+      type: object
+      required: [id, title, category, publishedAt, coverImage]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        category:
+          type: string
+        publishedAt:
+          type: string
+        coverImage:
+          type: ["string", "null"]
+
+    # ── STUDENTS ──────────────────────────────────────────────────────────
+    Student:
+      type: object
+      required: [id, studentId, firstName, lastName, grade, section, status, createdAt]
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        grade:
+          type: integer
+        section:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+
+    StudentInput:
+      type: object
+      required: [studentId, firstName, lastName, grade, section]
+      properties:
+        studentId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        grade:
+          type: integer
+          minimum: 7
+          maximum: 12
+        section:
+          type: string
+        status:
+          type: string
+          default: "Officially Enrolled"
+
+    StudentUpdate:
+      type: object
+      properties:
+        studentId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        grade:
+          type: integer
+          minimum: 7
+          maximum: 12
+        section:
+          type: string
+        status:
+          type: string
+
+    StudentListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Student"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    GradeSection:
+      type: object
+      required: [grade, section, count]
+      properties:
+        grade:
+          type: integer
+        section:
+          type: string
+        count:
+          type: integer
+
+    # ── PERSONNEL ─────────────────────────────────────────────────────────
+    Personnel:
+      type: object
+      required: [id, name, position, type, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        position:
+          type: string
+        type:
+          type: string
+          enum: [teaching, non_teaching, admin]
+        department:
+          type: ["string", "null"]
+        advisoryClass:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        office:
+          type: ["string", "null"]
+        photoUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    PersonnelInput:
+      type: object
+      required: [name, position, type]
+      properties:
+        name:
+          type: string
+        position:
+          type: string
+        type:
+          type: string
+          enum: [teaching, non_teaching, admin]
+        department:
+          type: string
+        advisoryClass:
+          type: string
+        email:
+          type: string
+        office:
+          type: string
+        photoUrl:
+          type: string
+
+    PersonnelUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        position:
+          type: string
+        type:
+          type: string
+          enum: [teaching, non_teaching, admin]
+        department:
+          type: string
+        advisoryClass:
+          type: string
+        email:
+          type: string
+        office:
+          type: string
+        photoUrl:
+          type: string
+
+    # ── NEWS ──────────────────────────────────────────────────────────────
+    News:
+      type: object
+      required: [id, title, content, category, isPinned, isArchived, publishedAt, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: ["string", "null"]
+        category:
+          type: string
+        isPinned:
+          type: boolean
+        isArchived:
+          type: boolean
+        coverImage:
+          type: ["string", "null"]
+        authorName:
+          type: ["string", "null"]
+        publishedAt:
+          type: string
+        createdAt:
+          type: string
+
+    NewsInput:
+      type: object
+      required: [title, content, category]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        category:
+          type: string
+        isPinned:
+          type: boolean
+          default: false
+        isArchived:
+          type: boolean
+          default: false
+        coverImage:
+          type: string
+
+    NewsUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        category:
+          type: string
+        isPinned:
+          type: boolean
+        isArchived:
+          type: boolean
+        coverImage:
+          type: string
+
+    NewsListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/News"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # ── ANNOUNCEMENTS ─────────────────────────────────────────────────────
+    Announcement:
+      type: object
+      required: [id, title, content, isPinned, isEmergency, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        isPinned:
+          type: boolean
+        isEmergency:
+          type: boolean
+        expiresAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AnnouncementInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        isPinned:
+          type: boolean
+          default: false
+        isEmergency:
+          type: boolean
+          default: false
+        expiresAt:
+          type: string
+
+    AnnouncementUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        isPinned:
+          type: boolean
+        isEmergency:
+          type: boolean
+        expiresAt:
+          type: string
+
+    AnnouncementListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Announcement"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # ── EVENTS ────────────────────────────────────────────────────────────
+    Event:
+      type: object
+      required: [id, title, startDate, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        startDate:
+          type: string
+        endDate:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    EventInput:
+      type: object
+      required: [title, startDate]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        location:
+          type: string
+        category:
+          type: string
+
+    EventUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        location:
+          type: string
+        category:
+          type: string
+
+    # ── DOWNLOADS ─────────────────────────────────────────────────────────
+    Download:
+      type: object
+      required: [id, title, category, fileName, fileUrl, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+        fileName:
+          type: string
+        fileUrl:
+          type: string
+        createdAt:
+          type: string
+
+    DownloadInput:
+      type: object
+      required: [title, category, fileName, fileUrl]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        fileName:
+          type: string
+        fileUrl:
+          type: string
+
+    DownloadUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        fileName:
+          type: string
+        fileUrl:
+          type: string
+
+    # ── GALLERY ───────────────────────────────────────────────────────────
+    GalleryItem:
+      type: object
+      required: [id, title, mediaType, url, category, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        mediaType:
+          type: string
+          enum: [photo, video]
+        url:
+          type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+        category:
+          type: string
+        createdAt:
+          type: string
+
+    GalleryInput:
+      type: object
+      required: [title, mediaType, url, category]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        mediaType:
+          type: string
+          enum: [photo, video]
+        url:
+          type: string
+        thumbnailUrl:
+          type: string
+        category:
+          type: string
+
+    # ── SSLG ──────────────────────────────────────────────────────────────
+    SSLG:
+      type: object
+      required: [id, adviserName, schoolYear]
+      properties:
+        id:
+          type: integer
+        adviserName:
+          type: string
+        schoolYear:
+          type: string
+        description:
+          type: ["string", "null"]
+        projects:
+          type: ["string", "null"]
+        activities:
+          type: ["string", "null"]
+
+    SSLGInput:
+      type: object
+      required: [adviserName, schoolYear]
+      properties:
+        adviserName:
+          type: string
+        schoolYear:
+          type: string
+        description:
+          type: string
+        projects:
+          type: string
+        activities:
+          type: string
+
+    SSLGOfficer:
+      type: object
+      required: [id, name, position, schoolYear]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        position:
+          type: string
+        committee:
+          type: ["string", "null"]
+        photoUrl:
+          type: ["string", "null"]
+        schoolYear:
+          type: string
+
+    SSLGOfficerInput:
+      type: object
+      required: [name, position, schoolYear]
+      properties:
+        name:
+          type: string
+        position:
+          type: string
+        committee:
+          type: string
+        photoUrl:
+          type: string
+        schoolYear:
+          type: string
+
+    # ── PTA ───────────────────────────────────────────────────────────────
+    PTA:
+      type: object
+      required: [id, schoolYear]
+      properties:
+        id:
+          type: integer
+        schoolYear:
+          type: string
+        constitution:
+          type: ["string", "null"]
+        projects:
+          type: ["string", "null"]
+        activities:
+          type: ["string", "null"]
+        meetingSchedule:
+          type: ["string", "null"]
+
+    PTAInput:
+      type: object
+      required: [schoolYear]
+      properties:
+        schoolYear:
+          type: string
+        constitution:
+          type: string
+        projects:
+          type: string
+        activities:
+          type: string
+        meetingSchedule:
+          type: string
+
+    PTAOfficer:
+      type: object
+      required: [id, name, position, schoolYear]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        position:
+          type: string
+        schoolYear:
+          type: string
+
+    PTAOfficerInput:
+      type: object
+      required: [name, position, schoolYear]
+      properties:
+        name:
+          type: string
+        position:
+          type: string
+        schoolYear:
+          type: string
+
+    # ── ABOUT ─────────────────────────────────────────────────────────────
+    About:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+        history:
+          type: ["string", "null"]
+        vision:
+          type: ["string", "null"]
+        mission:
+          type: ["string", "null"]
+        coreValues:
+          type: ["string", "null"]
+        hymn:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        officeHours:
+          type: ["string", "null"]
+        facebookUrl:
+          type: ["string", "null"]
+        principalName:
+          type: ["string", "null"]
+        principalMessage:
+          type: ["string", "null"]
+
+    AboutInput:
+      type: object
+      properties:
+        history:
+          type: string
+        vision:
+          type: string
+        mission:
+          type: string
+        coreValues:
+          type: string
+        hymn:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        officeHours:
+          type: string
+        facebookUrl:
+          type: string
+        principalName:
+          type: string
+        principalMessage:
+          type: string
+
+    # ── SEARCH ────────────────────────────────────────────────────────────
+    SearchResults:
+      type: object
+      required: [news, announcements, personnel]
+      properties:
+        news:
+          type: array
+          items:
+            $ref: "#/components/schemas/NewsSummary"
+        announcements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Announcement"
+        personnel:
+          type: array
+          items:
+            $ref: "#/components/schemas/Personnel"
+
+    # ── USERS ─────────────────────────────────────────────────────────────
+    User:
+      type: object
+      required: [id, username, name, role, createdAt]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, teacher, staff]
+        createdAt:
+          type: string
+
+    UserInput:
+      type: object
+      required: [username, password, name, role]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [admin, teacher, staff]
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [admin, teacher, staff]
+        password:
+          type: string

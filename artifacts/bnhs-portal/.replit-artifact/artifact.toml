@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Burgos National High School"
+version = "1.0.0"
+id = "artifacts/bnhs-portal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25001
+
+[services.development]
+run = "pnpm --filter @workspace/bnhs-portal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bnhs-portal", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/bnhs-portal/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25001"
+BASE_PATH = "/"
