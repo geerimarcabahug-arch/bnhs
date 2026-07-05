@@ -1,19 +1,19 @@
 import { Router, type IRouter } from "express";
-import healthRouter from "./health";
-import authRouter from "./auth";
-import dashboardRouter from "./dashboard";
-import studentsRouter from "./students";
-import personnelRouter from "./personnel";
-import newsRouter from "./news";
-import announcementsRouter from "./announcements";
-import eventsRouter from "./events";
-import downloadsRouter from "./downloads";
-import galleryRouter from "./gallery";
-import sslgRouter from "./sslg";
-import ptaRouter from "./pta";
-import aboutRouter from "./about";
-import searchRouter from "./search";
-import usersRouter from "./users";
+import healthRouter from "./health.js";
+import authRouter from "./auth.js";
+import dashboardRouter from "./dashboard.js";
+import studentsRouter from "./students.js";
+import personnelRouter from "./personnel.js";
+import newsRouter from "./news.js";
+import announcementsRouter from "./announcements.js";
+import eventsRouter from "./events.js";
+import downloadsRouter from "./downloads.js";
+import galleryRouter from "./gallery.js";
+import sslgRouter from "./sslg.js";
+import ptaRouter from "./pta.js";
+import aboutRouter from "./about.js";
+import searchRouter from "./search.js";
+import usersRouter from "./users.js";
 
 const router: IRouter = Router();
 
